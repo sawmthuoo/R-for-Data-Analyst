@@ -1,0 +1,552 @@
+---
+title: "6-data-summarizing-theory"
+format: revealjs
+editor: visual
+execute:
+  warning: false
+  message: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| labels: Import library
+library(tidyverse)
+library(flextable)
+```
+
+## Why do we summarize data?
+
+- To present information in a way that is easy to understand.
+
+- To check if the collected data make sense.
+
+- To report findings.
+
+- Without summarizing, raw data can be overwhelming and difficult to interpret
+
+## Summarizing Categorical Variables
+
+We use **frequency tables** to summarize categorical data.
+
+```{r}
+frequency_table <- tibble(
+  ID             = c("01", "02", "03", "04", "05"),
+  Sex            = c("Male", "Female", "Female", "Male", "Male"),
+  Marital_Status = c("Married", "Single", "Married", "Single", "Divorced"),
+  Age            = c(34, 27, 26, 40, 32),
+  Height_m       = c(16.5, 15.8, 15.4, 17.0, 15.9),
+  Education      = c("University", "High School", "Primary School", "Middle School", "High School")
+)
+
+frequency_table |> 
+  flextable() |> 
+  autofit()
+```
+
+::::::: columns
+:::: {.column width="50%"}
+::: fragment
+Frequency
+
+```{r}
+frequency_table |> 
+  count(Marital_Status) |> 
+  rename(Frequency = n) |> 
+  flextable()
+```
+:::
+::::
+
+:::: {.column width="50%"}
+::: fragment
+Relative Frequency
+
+```{r}
+frequency_table |> 
+  count(Marital_Status) |> 
+  rename(Frequency = n) |>
+  mutate(
+    Percent = paste0(Frequency * 100 / sum(Frequency),"%")
+  ) |> 
+  flextable() |> 
+  autofit()
+```
+:::
+::::
+:::::::
+
+## Summarizing Numerical Variables
+
+```{r}
+set.seed(7342)
+nor_dis <- tibble(value = rnorm(200, mean = 50, sd = 10))
+
+mean_val <- mean(nor_dis$value)
+median_val <- median(nor_dis$value)
+
+plot_nor_dis <- ggplot(nor_dis, aes(x = value)) +
+  geom_histogram(aes(y = after_stat(density)), 
+                 bins = 20, 
+                 fill = "steelblue", 
+                 color = "white") +
+  geom_density(color = "white", linewidth = 1.2) +
+  geom_vline(xintercept = mean_val, 
+             color = "black", 
+             linewidth = 1, 
+             linetype = "dashed") +
+  geom_vline(xintercept = median_val, 
+             color = "red", 
+             linewidth = 1, 
+             linetype = "dashed") +
+  annotate("text", 
+           x = mean_val + 0.5, 
+           y = 0.041, 
+           label = paste0("Mean = ", round(mean_val, 1)),
+           color = "black", 
+           hjust = 0,
+           size = 3.5) +
+  annotate("text",
+           x = median_val + 0.5,
+           y = 0.038, 
+           label = paste0("Median = ", round(median_val, 1)),
+           color = "red", 
+           hjust = 0, 
+           size = 3.5) +
+  labs(
+    title = "Normal Distribution: Center & Spread",
+    x = "Value",
+    y = "Density"
+  )
+
+plot_nor_dis
+```
+
+## Measuring the Center: Mean
+
+::: {style="font-size: 0.8em"}
+The **Mean** is the sum of all values divided by the number of values.
+
+$$\bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
+
+Where:
+
+- $\bar{x}$ = sample mean
+- $n$ = number of observations
+- $x_i$ = each individual value
+
+It can be used to summarize typical values in a dataset. But it is sensitive to **outliers** (extreme high or low values)
+:::
+
+## Mean: Example
+
+```{r}
+frequency_table |> 
+  flextable() |> 
+  autofit()
+```
+
+::: {.fragment style="font-size: 0.75em"}
+
+$$\begin{align}
+Mean(\bar{x}) &= \frac{34 + 27 + 26 + 40 + 32}{5} \\[6pt]
+&= \frac{159}{5} \\[6pt]
+&= 31.8
+\end{align}$$
+:::
+
+## Mean: Example with an outlier
+
+```{r}
+frequency_table |> 
+  mutate(
+    Age = Age |> 
+      replace_values(32 ~ 90)
+  ) |> flextable() |> 
+  autofit()
+```
+
+::: {.fragment style="font-size: 0.75em"}
+
+$$\begin{align}
+Mean(\bar{x}) &= \frac{34 + 27 + 26 + 40 + 90}{5} \\[6pt]
+&= \frac{217}{5} \\[6pt]
+&= 43.4
+\end{align}$$
+:::
+
+## Measuring the Center: Median
+
+- The Median is the middle value when data is ordered.
+- If the number of values is odd, median is the middle one.
+- If the number is even, median is the average of two middle numbers.
+- Median is unaffected by outliers (resistant measure of center)
+
+## Median: Example
+
+::: fragment
+```{r}
+frequency_table |> 
+  #select(ID, Age) |> 
+  flextable() |> 
+  autofit()
+```
+:::
+
+::: fragment
+```{r}
+frequency_table |> 
+  #select(ID, Age) |> 
+  arrange(Age) |> 
+  flextable() |> 
+  surround(
+    i = 3, j = c(1, 4),
+    border = fp_border_default(
+      color = "red", width = 1.5),
+    part = "body"
+  ) |> 
+  autofit()
+```
+:::
+
+## Median: Example with Outlier
+
+::: fragment
+```{r}
+frequency_table |> 
+  #select(ID, Age) |> 
+  flextable() |> 
+  autofit()
+```
+:::
+
+::: fragment
+```{r}
+frequency_table |> 
+  #select(ID, Age) |> 
+  mutate(
+    Age = case_when(
+      ID == "02" ~ 90,
+      TRUE ~ Age
+    )
+  ) |> 
+  arrange(Age) |> 
+  flextable() |> 
+  surround(
+    i = 3, j = c(1, 4),
+    border = fp_border_default(
+      color = "red", width = 1.5),
+    part = "body"
+  ) |> 
+  style(i = 5, j = 4,
+        pr_t = fp_text_default(
+          shading.color = "yellow"),
+        part = "body"
+        ) |> 
+  autofit()
+```
+:::
+
+## Median: Example (even number)
+
+::::::: columns
+:::: {.column width="50%"}
+::: fragment
+```{r}
+frequency_table_2 <- tibble(
+  ID             = c("01", "02", "03", "04", "05", "06"),
+  Age            = c(34, 27, 26, 40, 32, 43),
+)
+
+frequency_table_2 |> flextable()
+```
+:::
+::::
+
+:::: {.column width="50%"}
+::: fragment
+```{r}
+frequency_table_2 |> 
+  arrange(Age) |> 
+  flextable() |> 
+  surround(
+    i = c(3,4), j = 2,
+    border = fp_border_default(
+      color = "red", width = 1.5),
+    part = "body"
+  ) |> 
+  autofit()
+```
+:::
+::::
+:::::::
+
+::: fragment
+$$\text{Median} = \frac{32 + 34}{2} = 33$$
+:::
+
+## Measuring the spread (variation): Standard deviation
+
+- Standard deviation measures how much data varies around the mean.
+- A small standard deviation indicates most values are close to the mean.
+- A large standard deviation indicates values are spread out.
+- The standard deviation is calculated as $s = \sqrt{\frac{\sum_{i=1}^{n}(x_i - \bar{x})^2}{n-1}}$
+
+## Standard Deviation: Example 1
+
+:::::: columns
+::: {.column width="30%"}
+```{r}
+frequency_table |> 
+  select(ID, Age) |> 
+  flextable() |> 
+  fontsize(size = 20, part = "all") |> 
+  autofit()
+```
+:::
+
+:::: {.column width="70%"}
+::: {style="font-size: 0.75em"}
+$$\text{Mean}(\bar{x}) = \frac{34 + 27 + 26 + 40 + 32}{5} = 31.8$$
+
+$$SD(s) = \sqrt{\frac{(34 - 31.8)^2 + \cdots + (32 - 31.8)^2}{5 - 1}} = 5.67$$
+:::
+::::
+::::::
+
+## Standard Deviation: Example 2
+
+:::::: columns
+::: {.column width="30%"}
+```{r}
+tibble(
+  ID  = c("01", "02", "03", "04", "05"),
+  Age = c(18, 28, 35, 50, 64)
+) |> 
+  flextable() |> 
+  fontsize(size = 20, part = "all") |> 
+  autofit()
+```
+:::
+
+:::: {.column width="70%"}
+::: {style="font-size: 0.75em"}
+$$\text{Mean}(\bar{x}) = \frac{18 + 28 + 35 + 50 + 64}{5} = 39$$
+
+$$SD(s) = \sqrt{\frac{(18 - 39)^2 + \cdots + (64 - 39)^2}{5 - 1}} = 18.19$$
+:::
+::::
+::::::
+
+## Measuring the spread (variation): Range
+
+- Range is the difference between the highest and lowest values.
+- The range is calculated as $\text{Range} = x_{\max} - x_{\min}$
+- Easy to calculate, but not very useful because it depends on only two values.
+
+## Range: Example
+
+:::::: columns
+::: {.column width="30%"}
+```{r}
+tibble(
+  ID  = sprintf("%02d", 1:11),
+  Age = c(25, 33, 34, 35, 37, 40, 42, 53, 59, 60, 63)
+) |> 
+  flextable() |> 
+  fontsize(size = 20, part = "all") |> 
+  autofit()
+```
+:::
+
+:::: {.column width="70%"}
+::: {style="font-size: 0.75em"}
+$$\text{Range} = x_{\max} - x_{\min} = 63 - 25 = 38$$
+:::
+::::
+::::::
+
+## Measuring the spread (variation): Inter Quartile Range (IQR)
+
+- IQR focuses on the middle 50% of data, reducing impact of outliers.
+- The IQR is calculated as $\text{IQR} = Q_3 - Q_1$
+- Q1 (1st Quartile): 25% of the data is below this.
+- Q2 (3rd Quartile): 75% of the data is below this.
+
+## IQR: Example
+
+:::::: columns
+::: {.column width="30%"}
+```{r}
+tibble(
+  ID  = sprintf("%02d", 1:11),
+  Age = c(25, 33, 34, 35, 37, 40, 42, 53, 59, 60, 63)
+) |> 
+  flextable() |> 
+  fontsize(size = 20, part = "all") |> 
+  autofit()
+```
+:::
+
+:::: {.column width="70%"}
+::: {style="font-size: 0.75em"}
+$$\text{IQR} = Q_3 - Q_1 = 59 - 34 = 25$$
+:::
+::::
+::::::
+
+## Understanding Data Shapes: Histogram
+
+- By understanding shapes we can decide which measure we should use to present the data
+- Three basic shapes
+  - Right-skewed Data
+  - Left-Skewed Data
+  - Symmetric Data
+
+## Histogram: Right-Skewed Data
+
+:::::: columns
+:::: {.column width="50%"}
+::: {style="font-size: 0.8em"}
+- The **tail** stretches toward the **right** (high values)
+- Most values are **clustered on the left**
+- Mean is **pulled right** by extreme values → Mean \> Median
+- **Median** is the better measure of center
+
+**Common examples:**
+
+- 💰 Income / salary
+- 🏠 House prices
+:::
+::::
+
+::: {.column width="50%"}
+```{r}
+#| fig-height: 5.5
+#| fig-width: 5
+set.seed(5819)
+right_skew <- tibble(value = rlnorm(500, meanlog = 3, sdlog = 0.8))
+
+mean_rs <- mean(right_skew$value)
+median_rs <- median(right_skew$value)
+
+ggplot(right_skew, aes(x = value)) +
+  geom_histogram(aes(y = after_stat(density)),
+                 bins = 40,
+                 fill = "steelblue",
+                 color = "white") +
+  geom_density(color = "white", linewidth = 1.2) +
+  geom_vline(xintercept = mean_rs,
+             color = "black", linewidth = 1, linetype = "dashed") +
+  geom_vline(xintercept = median_rs,
+             color = "red", linewidth = 1, linetype = "dashed") +
+  annotate("text", x = mean_rs + 5, y = 0.009,
+           label = paste0("Mean = ", round(mean_rs, 1)),
+           color = "black", hjust = 0, size = 3.5) +
+  annotate("text", x = median_rs + 5, y = 0.0075,
+           label = paste0("Median = ", round(median_rs, 1)),
+           color = "red", hjust = 0, size = 3.5) +
+  labs(title = "Right-Skewed Distribution",
+       x = "Value", y = "Density")
+```
+:::
+::::::
+
+## Histogram: Left-Skewed Data
+
+:::::: columns
+:::: {.column width="50%"}
+::: {style="font-size: 0.8em"}
+- The **tail** stretches toward the **left** (low values)
+- Most values are **clustered on the right**
+- Mean is **pulled left** by extreme values → Mean \< Median
+- **Median** is the better measure of center
+
+**Common examples:**
+
+- 🎓 Exam scores (when the test is easy)
+- 🎂 Age at retirement
+:::
+::::
+
+::: {.column width="50%"}
+```{r}
+#| fig-height: 5.5
+#| fig-width: 5
+set.seed(3021)
+left_skew <- tibble(value = rbeta(500, shape1 = 8, shape2 = 2) * 100)
+
+mean_ls <- mean(left_skew$value)
+median_ls <- median(left_skew$value)
+
+ggplot(left_skew, aes(x = value)) +
+  geom_histogram(aes(y = after_stat(density)),
+                 bins = 30,
+                 fill = "steelblue",
+                 color = "white") +
+  geom_density(color = "white", linewidth = 1.2) +
+  geom_vline(xintercept = mean_ls,
+             color = "black", linewidth = 1, linetype = "dashed") +
+  geom_vline(xintercept = median_ls,
+             color = "red", linewidth = 1, linetype = "dashed") +
+  annotate("text", x = mean_ls - 1, y = 0.055,
+           label = paste0("Mean = ", round(mean_ls, 1)),
+           color = "black", hjust = 1, size = 3.5) +
+  annotate("text", x = median_ls - 1, y = 0.048,
+           label = paste0("Median = ", round(median_ls, 1)),
+           color = "red", hjust = 1, size = 3.5) +
+  labs(title = "Left-Skewed Distribution",
+       x = "Value", y = "Density")
+```
+:::
+::::::
+
+## Histogram: Symmetric (Bell) Data
+
+:::::: columns
+:::: {.column width="50%"}
+::: {style="font-size: 0.8em"}
+- The distribution is **mirror image** on both sides
+- Most values are **clustered around the center**
+- Mean ≈ Median ≈ Mode
+- **Mean** is the best measure of center
+- Also called a **Normal distribution**
+
+**Common examples:**
+
+- 📏 Height of adults
+- 🧠 IQ scores
+:::
+::::
+
+::: {.column width="50%"}
+```{r}
+#| fig-height: 5.5
+#| fig-width: 5
+set.seed(6174)
+sym_data <- tibble(value = rnorm(500, mean = 50, sd = 10))
+
+mean_sym <- mean(sym_data$value)
+median_sym <- median(sym_data$value)
+
+ggplot(sym_data, aes(x = value)) +
+  geom_histogram(aes(y = after_stat(density)),
+                 bins = 30,
+                 fill = "steelblue",
+                 color = "white") +
+  geom_density(color = "white", linewidth = 1.2) +
+  geom_vline(xintercept = mean_sym,
+             color = "black", linewidth = 1, linetype = "dashed") +
+  geom_vline(xintercept = median_sym,
+             color = "red", linewidth = 1, linetype = "dashed") +
+  annotate("text", x = mean_sym + 1, y = 0.043,
+           label = paste0("Mean = ", round(mean_sym, 1)),
+           color = "black", hjust = 0, size = 3.5) +
+  annotate("text", x = median_sym + 1, y = 0.038,
+           label = paste0("Median = ", round(median_sym, 1)),
+           color = "red", hjust = 0, size = 3.5) +
+  labs(title = "Symmetric Distribution",
+       x = "Value", y = "Density")
+```
+:::
+::::::

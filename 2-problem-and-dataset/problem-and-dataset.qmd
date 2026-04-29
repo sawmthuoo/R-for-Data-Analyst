@@ -1,0 +1,160 @@
+---
+title: "Problem and Dataset"
+author: "Saw Min Thu Oo"
+date: today
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    transition: fade
+    toc: false
+    logo: ""
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+## Agenda
+
+1. The Problem
+2. The Dataset
+3. Data Types
+
+# Project-based learning {background-color="#2c3e50"}
+
+## The Problem
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**Business Context**
+
+You are a data analyst at a **financial institution**.
+
+You have been asked to prepare a report based on collected credit card data.
+:::
+
+::: {.column width="50%"}
+**Manager's Requirements**
+
+- Demographic profile of credit card holders
+- Distribution of income and credit card balance
+- Financial variables most associated with balance (credit limit, rating, income)
+- Whether balance differs across demographic groups
+:::
+
+::::
+
+## Questions
+
+::: {.incremental}
+1. What does the demographic profile of credit card holders look like?
+2. How are income and credit card balance distributed across the cardholder population?
+3. Which financial variables (credit limit, credit rating, income) are most associated with credit card balance?
+4. Do credit card balances differ meaningfully across demographic groups?
+:::
+
+# The Dataset {background-color="#2c3e50"}
+
+## Dataset Overview
+
+The dataset contains **400 observations** of credit card holders with **12 variables** covering:
+
+::: {.incremental}
+- **Identity** — unique record ID
+- **Financial** — income, credit limit, credit rating, card balance
+- **Demographic** — age, gender, marital status, ethnicity
+- **Behavioral** — number of cards, student status
+- **Education** — years of education
+:::
+
+## Variable Definitions
+
+| Variable | Description |
+|----------|-------------|
+| `ID` | Identification number |
+| `Income` | Annual income in \$1,000's |
+| `Limit` | Credit limit (\$) |
+| `Rating` | Credit rating score |
+| `Cards` | Number of credit cards held |
+| `Age` | Age in years |
+
+## Variable Definitions (cont.)
+
+| Variable | Description |
+|----------|-------------|
+| `Education` | Years of education completed |
+| `Gender` | Male / Female |
+| `Student` | Student status: Yes / No |
+| `Married` | Marital status: Yes / No |
+| `Ethnicity` | African American / Asian / Caucasian |
+| `Balance` | Average credit card balance ($) |
+
+# Data Types {background-color="#2c3e50"}
+
+## Data Types Overview
+
+```{r}
+#| label: data-types-table
+library(tibble)
+library(knitr)
+
+tibble::tribble(
+  ~Variable,    ~`R Type`,   ~`Statistical Type`,
+  "ID",         "integer",   "Identifier",
+  "Income",     "numeric",   "Continuous (ratio)",
+  "Limit",      "integer",   "Continuous (ratio)",
+  "Rating",     "integer",   "Continuous (ratio)",
+  "Cards",      "integer",   "Discrete (count)",
+  "Age",        "integer",   "Continuous (ratio)",
+  "Education",  "integer",   "Discrete (ordinal)",
+  "Gender",     "factor",    "Categorical – binary",
+  "Student",    "factor",    "Categorical – binary",
+  "Married",    "factor",    "Categorical – binary",
+  "Ethnicity",  "factor",    "Categorical – unordered",
+  "Balance",    "numeric",   "Continuous (ratio)"
+) |> knitr::kable()
+```
+
+## Data Type Reference
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**Numerical (Quantitative)**
+
+- *Continuous* — can take any value in a range
+  - Float: `Income`, `Balance`
+  - Integer: `Limit`, `Rating`, `Age`
+- *Discrete* — whole number counts
+  - `Cards`, `Education`
+:::
+
+::: {.column width="50%"}
+**Categorical (Qualitative)**
+
+- *Binary* — two levels only
+  - `Gender`, `Student`, `Married`
+- *Unordered* — no natural ranking
+  - `Ethnicity`
+- *Ordered* — ranked categories
+  - e.g., education tiers (if grouped)
+
+**Other**
+
+- Logical: `TRUE` / `FALSE`
+- Missing: `NA`
+:::
+
+::::
+
+## Summary
+
+::: {.callout-tip}
+## Key Takeaway
+
+Understanding data types upfront ensures the **right analytical methods** are applied — for example, using frequency tables for categoricals and summary statistics for numericals.
+:::
+
+**Next steps:** Data import, cleaning, and exploratory analysis.
