@@ -8,6 +8,7 @@ format:
     slide-number: true
     transition: fade
     toc: false
+    chalkboard: true
     logo: ""
 execute:
   echo: false
