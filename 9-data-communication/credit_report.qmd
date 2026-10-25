@@ -1,0 +1,103 @@
+---
+title: "Credit report"
+format: docx
+editor: visual
+execute: 
+  warning: false
+  echo: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(here)
+library(flextable)
+```
+
+```{r}
+credit <- read_csv(here("data", "Credit_Update.csv")) |> 
+  clean_names()
+```
+
+## Introduction
+
+```{r}
+n <- nrow(credit)
+```
+
+The credit data is collected in August, 2026. The dataset contains information of credit card holders of the bank. Total number of people in the dataset is `r n`.
+
+## Demography
+
+```{r}
+n_male <- credit |> filter(gender == "Male") |> nrow()
+n_female <- credit |> filter(gender == "Female") |> nrow()
+```
+
+The data covers `r n_male` males and `r n_female` females. The following table shows the ethnicity breakdowns.
+
+```{r}
+tbl_ethnicity <- credit |> 
+  count(ethnicity) |> 
+  flextable() |> 
+  autofit()
+
+tbl_ethnicity
+```
+
+## Income distribution
+
+```{r}
+med_inc <- round_half_up(median(credit$income, na.rm = TRUE), 2)
+min_inc <- round_half_up(min(credit$income, na.rm = TRUE), 2)
+max_inc <- round_half_up(max(credit$income, na.rm = TRUE), 2)
+```
+
+Median income of the participant is `r med_inc` USD, ranging from `r min_inc` to `r max_inc` . Figure below show the income distribution.
+
+```{r}
+credit |> 
+  ggplot(aes(income)) + 
+  geom_density(fill = "lightblue") +
+  labs(
+    x = "Income (in thousand)",
+    y = "Number of participants"
+  )
+```
+
+```{r}
+avg_bal <- round_half_up(mean(credit$balance, na.rm = TRUE), 2)
+```
+
+Average credit balance is `r avg_bal` USD. As shown in the following figure, African American people recorded highest credit balance on average, followed by Caucasian.
+
+```{r}
+credit |> 
+  summarize(
+    .by = ethnicity,
+    avg_balance = round_half_up(mean(balance, na.rm = TRUE), 2)
+  ) |> 
+  ggplot(aes(ethnicity, avg_balance, fill = ethnicity)) +
+  geom_bar(stat = "identity") +
+  labs(
+    x = "Ethnicity group",
+    y = "Average credit balance"
+  )
+```
+
+## Variable associated with balance
+
+There is a possible positive relationship between the credit card balance and annual income of card holders. The person who earns more is likely to have better credit balance.
+
+```{r}
+credit |> 
+  ggplot(aes(income, balance)) +
+  geom_point(color = "darkblue", alpha = 0.4) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    x = "Income (in thousand)",
+    y = "Credit balance"
+  )
+```

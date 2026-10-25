@@ -100,25 +100,30 @@ The dataset contains **400 observations** of credit card holders with **12 varia
 #| label: data-types-table
 library(tibble)
 library(knitr)
+library(flextable)
 
 tibble::tribble(
   ~Variable,    ~`R Type`,   ~`Statistical Type`,
   "ID",         "integer",   "Identifier",
-  "Income",     "numeric",   "Continuous (ratio)",
-  "Limit",      "integer",   "Continuous (ratio)",
-  "Rating",     "integer",   "Continuous (ratio)",
-  "Cards",      "integer",   "Discrete (count)",
-  "Age",        "integer",   "Continuous (ratio)",
-  "Education",  "integer",   "Discrete (ordinal)",
-  "Gender",     "factor",    "Categorical – binary",
-  "Student",    "factor",    "Categorical – binary",
-  "Married",    "factor",    "Categorical – binary",
-  "Ethnicity",  "factor",    "Categorical – unordered",
-  "Balance",    "numeric",   "Continuous (ratio)"
-) |> knitr::kable()
+  "Income",     "numeric",   "Continuous",
+  "Limit",      "integer",   "Continuous",
+  "Rating",     "integer",   "Continuous",
+  "Cards",      "integer",   "Discrete",
+  "Age",        "integer",   "Continuous",
+  "Education",  "integer",   "Discrete",
+  "Gender",     "factor",    "Categorical",
+  "Student",    "factor",    "Categorical",
+  "Married",    "factor",    "Categorical",
+  "Ethnicity",  "factor",    "Categorical",
+  "Balance",    "numeric",   "Continuous"
+) |> 
+  flextable() |> 
+  autofit() |> 
+  fontsize(size = 16, part = "all") |> 
+  set_table_properties(width = 1, layout = "autofit")
 ```
 
-## Data Type Reference
+## Data Type Reference {.smaller}
 
 :::: {.columns}
 

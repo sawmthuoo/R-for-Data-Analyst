@@ -3,6 +3,13 @@
 
 # Library ----------------------------------------------------------------------
 library(tidyverse)
+library(janitor)
+
+credit_update <- read_csv("data/Credit_update.csv")
+credit_update_clean <- credit_update |> 
+  clean_names() |> 
+  remove_empty() |> 
+  remove_constant()
 
 # 1.Operation on rows ----------------------------------------------------------
 
